@@ -12,7 +12,7 @@ const auth=async (req,res,next)=>{
         req.user=user;
         next();
     } catch (error) {
-        res.send("Unable to authenticate :(")
+        res.status(400).send("Unable to authenticate :(")
     }
 }
 module.exports=auth;

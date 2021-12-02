@@ -21,7 +21,7 @@ router.post('/users', async (req, res) => {
 
     try {
         await user.save()
-        sendWelcomeEmail(user.email,user.name);
+        // sendWelcomeEmail(user.email,user.name);
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (e) {
@@ -86,7 +86,7 @@ router.get('/users/:id/avatar',async (req,res)=>{
     }
 })
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/me',auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -96,14 +96,8 @@ router.patch('/users/:id', async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.params.id)
-
-        updates.forEach((update) => user[update] = req.body[update])
-        await user.save()
-
-        if (!user) {
-            return res.status(404).send()
-        }
+        updates.forEach((update) => req.user[update] = req.body[update])
+        await req.user.save()
 
         res.send(user)
     } catch (e) {
@@ -114,10 +108,10 @@ router.delete('/user/me',auth, async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.user._id)
 
-        if (!user) {
-            return res.status(404).send()
-        }
-        sendRemovalEmail(user.email,user.name)
+        // if (!user) {
+        //     return res.status(404).send()
+        // }
+        // sendRemovalEmail(user.email,user.name)
         res.send(user)
     } catch (e) {
         res.status(500).send()
